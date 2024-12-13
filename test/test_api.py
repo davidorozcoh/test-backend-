@@ -1,41 +1,43 @@
 import pytest
-import json
+import requests
 from jsonschema import validate, ValidationError
 
-file_path = "data.json"
-
-with open(file_path, 'r', encoding='utf-8') as f:
-    response_json = json.load(f)
+url = "https://fake-json-api.mock.beeceptor.com/companies"
 
 expected_json_schema = {
     "type": "array",
     "items": {
         "type": "object",
         "properties": {
-            "identificación": {"type": "integer"},
-            "nombre": {"type": "string"},
-            "dirección": {"type": "string"},
-            "código postal": {"type": "string"},
-            "país": {"type": "string"},
-            "número de empleados": {"type": "integer"},
-            "industria": {"type": "string"},
-            "capitalización de mercado": {"type": "integer"},
-            "dominio": {"type": "string"},
-            "logotipo": {"type": "string", "format": "uri"},
+            "id": {"type": "integer"},
+            "name": {"type": "string"},
+            "address": {"type": "string"},
+            "zip": {"type": "string"},
+            "country": {"type": "string"},
+            "employeeCount": {"type": "integer"},
+            "industry": {"type": "string"},
+            "marketCap": {"type": "integer"},
+            "domain": {"type": "string"},
+            "logo": {"type": "string", "format": "uri"},
             "ceoName": {"type": "string"},
-            "nombredelceo": {"type": "string"},
-            "nombredeldirector": {"type": "string"},
-            "nombre del director ejecutivo": {"type": "string"}
+            "ceoFullName": {"type": "string"},
+            "directorName": {"type": "string"},
+            "executiveDirectorName": {"type": "string"}
         },
         "required": [
-            "identificación", "nombre", "dirección", "código postal",
-            "país", "número de empleados", "industria",
-            "capitalización de mercado", "dominio", "logotipo"
+            "id", "name", "address", "zip",
+            "country", "employeeCount", "industry",
+            "marketCap", "domain", "logo"
         ]
     }
 }
 
 def test_validate_json_schema():
+    response = requests.get(url)
+    if response.status_code == 200:
+        response_json = response.json()
+    else:
+        pytest.fail(f"Request to {url} failed with status code {response.status_code}")
     try:
         validate(instance=response_json, schema=expected_json_schema)
         print("JSON structure is correct and matches the schema.")
